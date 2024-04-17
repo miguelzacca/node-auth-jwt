@@ -1,6 +1,6 @@
 # Node Auth Test
 
-Simple authentication with Node.js, MongoDB cloud and jwt.
+Simple authentication with Node.js, MongoDB + AWS (cloud) and jwt.
 
 ## Instalation
 
