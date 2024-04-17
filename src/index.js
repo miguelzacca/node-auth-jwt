@@ -20,7 +20,7 @@ const checkToken = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ msg: "Access denied" });
+    return res.status(401).json({ msg: "Access denied." });
   }
 
   try {
@@ -35,7 +35,7 @@ const checkToken = (req, res, next) => {
 app.get("/user/:id", checkToken, async (req, res) => {
   const id = req.params.id;
 
-  const user = await User.findId(id, "-passwd");
+  const user = await User.findById(id).select("-passwd");
 
   if (!user) {
     return res.status(404).json({ msg: "User not found." });
@@ -74,7 +74,7 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/user", async (req, res) => {
+app.post("/auth/login", async (req, res) => {
   const { name, email, passwd } = req.body;
 
   const user = await User.findOne({ email: email });
@@ -94,7 +94,7 @@ app.post("/auth/user", async (req, res) => {
 
     const token = jwt.sign(
       {
-        id: user_id,
+        id: user._id,
       },
       secret
     );
