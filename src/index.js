@@ -4,12 +4,19 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { z } from "zod";
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+
+const userInputSchema = z.object({
+  name: z.string().min(3).max(100),
+  email: z.string().email().max(150),
+  passwd: z.string().min(6).max(16)
+});
 
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome!" });
@@ -45,7 +52,7 @@ app.get("/user/:id", checkToken, async (req, res) => {
 });
 
 app.post("/auth/register", async (req, res) => {
-  const { name, email, passwd } = req.body;
+  const {name, email, passwd} = await userInputSchema.parse(req.body);
 
   const userExists = await User.findOne({ email: email });
 
@@ -75,7 +82,7 @@ app.post("/auth/register", async (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-  const { name, email, passwd } = req.body;
+  const { name, email, passwd } = userInputSchema.parse(req.body);
 
   const user = await User.findOne({ email: email });
 
