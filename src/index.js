@@ -53,7 +53,7 @@ const userDataSchema = z.object({
 
 const validateData = (data) => {
   try {
-    userDataSchema.parse(data);
+    return userDataSchema.parse(data);
   } catch (err) {
     err = [err, true];
     throw err;
