@@ -1,16 +1,22 @@
-# Node Auth Test
+# Node.js Authentication
 
 Simple authentication with Node.js, MongoDB + AWS (cloud) and jwt.
 
 ## Instalation
 
-```npm install```
+```
+npm install
+```
 
 ## Use
 
-```node src/index.js```
-or
-```npm run dev```
+```
+node src/index.js
+```
+or for development
+```
+npm run dev
+```
 
 ## ngrok
 
