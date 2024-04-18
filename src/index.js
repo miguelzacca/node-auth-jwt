@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { z } from "zod";
 
 dotenv.config();
 
@@ -44,30 +45,55 @@ app.get("/user/:id", checkToken, async (req, res) => {
   res.status(200).json({ user });
 });
 
-app.post("/auth/register", async (req, res) => {
-  const { name, email, passwd } = req.body;
+const registerSchema = z.object({
+  name: z.string().min(3).max(100),
+  email: z.string().email().max(150),
+  passwd: z.string().min(6).max(16),
+});
 
-  const userExists = await User.findOne({ email: email });
+const loginSchema = z.object({
+  email: z.string().email().max(150),
+  passwd: z.string().min(6).max(16),
+});
 
-  if (userExists) {
-    return res.status(422).json({ msg: "Please use another email." });
-  }
-
-  const salt = await bcrypt.genSalt(12);
-  const passwdHash = await bcrypt.hash(passwd, salt);
-
-  const user = new User({
-    name,
-    email,
-    passwd: passwdHash,
-  });
-
+const validateData = (data) => {
   try {
-    await user.save();
-    res.status(201).json({ msg: "User created successfully" });
+    if (data.name) {
+      return registerSchema.parse(data);
+    }
+    return loginSchema.parse(data);
   } catch (err) {
-    console.log(err);
+    err = [err, true];
+    throw err;
+  }
+};
 
+app.post("/auth/register", async (req, res) => {
+  try {
+    const { name, email, passwd } = validateData(req.body);
+
+    const userExists = await User.findOne({ email: email });
+
+    if (userExists) {
+      return res.status(422).json({ msg: "Please use another email." });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const passwdHash = await bcrypt.hash(passwd, salt);
+
+    const user = new User({
+      name,
+      email,
+      passwd: passwdHash,
+    });
+
+    await user.save();
+    res.status(201).json({ msg: "User created successfully." });
+  } catch (err) {
+    if (err[1]) {
+      return res.status(400).json({ msg: err[0] });
+    }
+    console.log(err);
     res
       .status(500)
       .json({ msg: "A server error occurred, please try again later." });
@@ -75,7 +101,7 @@ app.post("/auth/register", async (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-  const { name, email, passwd } = req.body;
+  const { email, passwd } = req.body;
 
   const user = await User.findOne({ email: email });
 
@@ -102,7 +128,6 @@ app.post("/auth/login", async (req, res) => {
     res.status(200).json({ msg: "Authentication success", token });
   } catch (err) {
     console.log(err);
-
     res
       .status(500)
       .json({ msg: "A server error occurred, please try again later." });
