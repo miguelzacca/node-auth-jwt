@@ -1,6 +1,6 @@
 # Node.js Authentication
 
-Simple authentication with Node.js, MongoDB + AWS (cloud) and jwt.
+Simple authentication with Node.js, MongoDB + AWS (cloud) and JWT.
 
 ## Instalation
 

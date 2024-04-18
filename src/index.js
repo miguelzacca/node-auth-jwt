@@ -45,23 +45,15 @@ app.get("/user/:id", checkToken, async (req, res) => {
   res.status(200).json({ user });
 });
 
-const registerSchema = z.object({
+const userDataSchema = z.object({
   name: z.string().min(3).max(100),
-  email: z.string().email().max(150),
-  passwd: z.string().min(6).max(16),
-});
-
-const loginSchema = z.object({
   email: z.string().email().max(150),
   passwd: z.string().min(6).max(16),
 });
 
 const validateData = (data) => {
   try {
-    if (data.name) {
-      return registerSchema.parse(data);
-    }
-    return loginSchema.parse(data);
+    userDataSchema.parse(data);
   } catch (err) {
     err = [err, true];
     throw err;
